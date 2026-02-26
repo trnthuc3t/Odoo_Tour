@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_cus_product_root"
+              name="Custom Product"
+              sequence="10"/>
+
+    <!-- Sub Menu -->
+    <menuitem id="menu_cus_product"
+              name="Sản phẩm tùy chỉnh"
+              parent="menu_cus_product_root"
+              action="action_cus_product"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_product_management_root"
+              name="Quản lý sản phẩm"
+              sequence="10"/>
+
+    <!-- Sub Menu -->
+    <menuitem id="menu_product_management"
+              name="Sản phẩm"
+              parent="menu_product_management_root"
+              action="action_product_management"
+              sequence="10"/>
+</odoo>

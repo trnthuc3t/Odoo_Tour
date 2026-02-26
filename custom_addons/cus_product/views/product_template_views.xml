@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View - Danh sách sản phẩm -->
+    <record id="view_cus_product_tree" model="ir.ui.view">
+        <field name="name">cus.product.tree</field>
+        <field name="model">cus.product</field>
+        <field name="arch" type="xml">
+            <tree string="Sản phẩm"
+                  decoration-success="state=='available'"
+                  decoration-danger="state=='out_of_stock'"
+                  decoration-muted="state=='discontinued'"
+                  decoration-info="state=='draft'">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="price" string="Giá bán"/>
+                <field name="cost" string="Giá vốn"/>
+                <field name="profit"/>
+                <field name="margin_percent" string="% LN"/>
+                <field name="quantity"/>
+                <field name="quantity_sold" optional="hide"/>
+                <field name="total_value" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state=='available'"
+                       decoration-danger="state=='out_of_stock'"
+                       decoration-info="state=='draft'"
+                       decoration-muted="state=='discontinued'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View - Chi tiết sản phẩm -->
+    <record id="view_cus_product_form" model="ir.ui.view">
+        <field name="name">cus.product.form</field>
+        <field name="model">cus.product</field>
+        <field name="arch" type="xml">
+            <form string="Sản phẩm">
+                <header>
+                    <button name="action_set_available"
+                            string="Đặt Có sẵn"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state == 'available'"/>
+                    <button name="action_set_out_of_stock"
+                            string="Đặt Hết hàng"
+                            type="object"
+                            invisible="state == 'out_of_stock'"/>
+                    <button name="action_set_discontinued"
+                            string="Ngừng kinh doanh"
+                            type="object"
+                            confirm="Bạn có chắc muốn ngừng kinh doanh sản phẩm này?"
+                            invisible="state == 'discontinued'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,available,out_of_stock,discontinued"/>
+                </header>
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Tên sản phẩm..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Thông tin cơ bản">
+                            <field name="code"/>
+                            <field name="barcode"/>
+                            <field name="category"/>
+                            <field name="weight"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Giá cả & Tồn kho">
+                            <field name="price"/>
+                            <field name="cost"/>
+                            <field name="profit" readonly="1"/>
+                            <field name="margin_percent" readonly="1" widget="percentage"/>
+                            <field name="quantity"/>
+                            <field name="quantity_sold" readonly="1"/>
+                            <field name="total_value" readonly="1"/>
+                            <field name="total_profit" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Mô tả">
+                            <field name="description" placeholder="Nhập mô tả chi tiết về sản phẩm..."/>
+                        </page>
+                        <page string="Ghi chú">
+                            <field name="note" placeholder="Ghi chú thêm..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Kanban View - Hiển thị dạng thẻ -->
+    <record id="view_cus_product_kanban" model="ir.ui.view">
+        <field name="name">cus.product.kanban</field>
+        <field name="model">cus.product</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="price"/>
+                <field name="quantity"/>
+                <field name="state"/>
+                <field name="image"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('cus.product', 'image', record.id.raw_value)"
+                                     alt="Product" class="o_image_64_contain"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="o_kanban_record_subtitle">
+                                    Mã: <field name="code"/>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <span>Giá: <field name="price"/> VNĐ</span><br/>
+                                        <span>SL: <field name="quantity"/></span>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="state" widget="label_selection"
+                                               options="{'classes': {'available': 'success', 'out_of_stock': 'danger', 'draft': 'info', 'discontinued': 'default'}}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search View - Tìm kiếm & lọc -->
+    <record id="view_cus_product_search" model="ir.ui.view">
+        <field name="name">cus.product.search</field>
+        <field name="model">cus.product</field>
+        <field name="arch" type="xml">
+            <search string="Tìm kiếm sản phẩm">
+                <field name="name" string="Sản phẩm"
+                       filter_domain="['|', '|', ('name', 'ilike', self), ('code', 'ilike', self), ('barcode', 'ilike', self)]"/>
+                <field name="category"/>
+                <field name="code"/>
+                <field name="barcode"/>
+
+                <separator/>
+                <filter string="Có sẵn" name="available" domain="[('state', '=', 'available')]"/>
+                <filter string="Hết hàng" name="out_of_stock" domain="[('state', '=', 'out_of_stock')]"/>
+                <filter string="Nháp" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Ngừng kinh doanh" name="discontinued" domain="[('state', '=', 'discontinued')]"/>
+
+                <separator/>
+                <filter string="Hoạt động" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Không hoạt động" name="inactive" domain="[('active', '=', False)]"/>
+
+                <separator/>
+                <filter string="Sắp hết hàng" name="low_stock" domain="[('quantity', '&lt;', 10), ('quantity', '&gt;', 0)]"/>
+                <filter string="Có lãi" name="profitable" domain="[('profit', '&gt;', 0)]"/>
+                <filter string="Lỗ" name="loss" domain="[('profit', '&lt;', 0)]"/>
+
+                <group expand="0" string="Nhóm theo">
+                    <filter string="Danh mục" name="group_category" context="{'group_by': 'category'}"/>
+                    <filter string="Trạng thái" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action - Mở danh sách sản phẩm -->
+    <record id="action_cus_product" model="ir.actions.act_window">
+        <field name="name">Sản phẩm</field>
+        <field name="res_model">cus.product</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Tạo sản phẩm đầu tiên của bạn
+            </p>
+            <p>
+                Nhấn vào nút <b>Tạo</b> để thêm sản phẩm mới vào hệ thống.<br/>
+                Bạn có thể quản lý thông tin sản phẩm, giá cả, tồn kho và nhiều hơn nữa.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu chính -->
+    <menuitem id="menu_cus_product_root"
+              name="Quản lý sản phẩm"
+              sequence="10"/>
+
+    <!-- Menu con - Sản phẩm -->
+    <menuitem id="menu_cus_product"
+              name="Sản phẩm"
+              parent="menu_cus_product_root"
+              action="action_cus_product"
+              sequence="10"/>
+
+</odoo>

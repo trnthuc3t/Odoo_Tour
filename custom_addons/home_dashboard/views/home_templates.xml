@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="home_page" name="Home Dashboard">
+            <t t-call="web.frontend_layout">
+                <div class="home-wrapper">
+                    <div class="home-bg"/>
+
+                    <!-- Top Bar -->
+                    <div class="top-bar">
+                        <a href="/web" class="menu-btn"><i class="fa fa-th"/></a>
+                        <div class="top-right">
+                            <a href="#" class="nav-item" onclick="toggleSearch(); return false;">
+                                <i class="fa fa-search"/>
+                            </a>
+                            <a href="#" class="nav-item"><i class="fa fa-comments"/><span class="badge">3</span></a>
+                            <span class="clock" id="clock">12:00</span>
+                            <a href="/web#action=base.action_res_users" class="user-link">
+                                <span class="avatar" t-attf-style="background-color: #{avatar_color}">
+                                    <t t-esc="user_initials"/>
+                                </span>
+                                <span class="user-name"><t t-esc="user.name"/></span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="content">
+                        <!-- Search Trigger -->
+                        <div class="search-trigger" onclick="toggleSearch()">
+                            <i class="fa fa-search"/>
+                            <span>Tìm kiếm hoặc nhập lệnh...</span>
+                            <kbd>Ctrl</kbd> <kbd>K</kbd>
+                        </div>
+
+                        <!-- Apps Grid -->
+                        <div class="apps-grid">
+                            <t t-foreach="modules" t-as="module">
+                                <a t-att-href="module['url']" class="app-item">
+                                    <div class="app-icon">
+                                        <img t-att-src="module['icon_paths'][0]" t-att-alt="module['name']" onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg, #667eea, #764ba2)'"/>
+                                    </div>
+                                    <span class="app-name"><t t-esc="module['short_name']"/></span>
+                                </a>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Command Palette Overlay -->
+                <div id="commandPalette" class="command-palette-overlay" style="display:none;" onclick="closeSearch(event)">
+                    <div class="command-palette" onclick="event.stopPropagation()">
+                        <div class="search-input-wrap">
+                            <i class="fa fa-search"/>
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm apps, menus, settings..." autocomplete="off"/>
+                            <kbd class="esc-key" onclick="toggleSearch()">ESC</kbd>
+                        </div>
+                        <div class="search-results" id="searchResults">
+                            <!-- Results will be populated by JS -->
+                        </div>
+                        <div class="search-footer">
+                            <span><kbd>↑</kbd> <kbd>↓</kbd> điều hướng</span>
+                            <span><kbd>Enter</kbd> chọn</span>
+                            <span><kbd>ESC</kbd> đóng</span>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .home-wrapper {
+                        min-height: 100vh;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    }
+                    .home-bg {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(180deg, #4a3f6b 0%, #6b5b95 40%, #8b7cb3 70%, #c5c5d8 100%);
+                        z-index: -1;
+                    }
+                    .top-bar {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 15px 30px;
+                        background: rgba(255,255,255,0.1);
+                    }
+                    .menu-btn {
+                        color: white;
+                        font-size: 20px;
+                        text-decoration: none;
+                        padding: 8px;
+                    }
+                    .top-right {
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                    }
+                    .nav-item {
+                        color: white;
+                        font-size: 18px;
+                        position: relative;
+                        text-decoration: none;
+                        cursor: pointer;
+                    }
+                    .badge {
+                        position: absolute;
+                        top: -8px;
+                        right: -8px;
+                        background: #e74c3c;
+                        color: white;
+                        font-size: 10px;
+                        padding: 2px 5px;
+                        border-radius: 10px;
+                    }
+                    .clock {
+                        color: white;
+                        font-size: 14px;
+                    }
+                    .user-link {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        text-decoration: none;
+                    }
+                    .avatar {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 12px;
+                        font-weight: bold;
+                    }
+                    .user-name {
+                        color: white;
+                        font-size: 14px;
+                    }
+                    .content {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                        padding: 40px 20px;
+                    }
+
+                    /* Search Trigger */
+                    .search-trigger {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        background: rgba(255,255,255,0.15);
+                        border: 1px solid rgba(255,255,255,0.2);
+                        border-radius: 12px;
+                        padding: 12px 20px;
+                        margin-bottom: 40px;
+                        cursor: pointer;
+                        color: rgba(255,255,255,0.8);
+                        transition: all 0.2s;
+                        max-width: 500px;
+                        margin-left: auto;
+                        margin-right: auto;
+                    }
+                    .search-trigger:hover {
+                        background: rgba(255,255,255,0.25);
+                        border-color: rgba(255,255,255,0.3);
+                    }
+                    .search-trigger i {
+                        font-size: 16px;
+                    }
+                    .search-trigger span {
+                        flex: 1;
+                        font-size: 14px;
+                    }
+                    .search-trigger kbd {
+                        background: rgba(255,255,255,0.2);
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                        font-size: 12px;
+                        font-family: monospace;
+                    }
+
+                    /* Apps Grid */
+                    .apps-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+                        gap: 25px;
+                        justify-items: center;
+                    }
+                    .app-item {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        text-decoration: none;
+                        width: 85px;
+                        transition: transform 0.2s;
+                    }
+                    .app-item:hover {
+                        transform: translateY(-3px);
+                    }
+                    .app-icon {
+                        width: 65px;
+                        height: 65px;
+                        border-radius: 14px;
+                        overflow: hidden;
+                        background: white;
+                        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+                        margin-bottom: 8px;
+                    }
+                    .app-icon img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                    .app-name {
+                        font-size: 12px;
+                        color: white;
+                        text-align: center;
+                        max-width: 85px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                    }
+
+                    /* Command Palette */
+                    .command-palette-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.5);
+                        z-index: 9999;
+                        display: flex;
+                        align-items: flex-start;
+                        justify-content: center;
+                        padding-top: 100px;
+                    }
+                    .command-palette {
+                        width: 100%;
+                        max-width: 600px;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+                        overflow: hidden;
+                    }
+                    .search-input-wrap {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 16px 20px;
+                        border-bottom: 1px solid #e5e5e5;
+                    }
+                    .search-input-wrap i {
+                        color: #999;
+                        font-size: 18px;
+                    }
+                    .search-input-wrap input {
+                        flex: 1;
+                        border: none;
+                        outline: none;
+                        font-size: 16px;
+                        padding: 4px 0;
+                    }
+                    .esc-key {
+                        background: #f0f0f0;
+                        padding: 4px 10px;
+                        border-radius: 6px;
+                        font-size: 12px;
+                        cursor: pointer;
+                        border: none;
+                    }
+                    .search-results {
+                        max-height: 400px;
+                        overflow-y: auto;
+                    }
+                    .result-group {
+                        padding: 8px 0;
+                    }
+                    .result-group-title {
+                        padding: 8px 20px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #666;
+                        text-transform: uppercase;
+                    }
+                    .result-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 12px 20px;
+                        cursor: pointer;
+                        transition: background 0.15s;
+                        text-decoration: none;
+                        color: inherit;
+                    }
+                    .result-item:hover, .result-item.selected {
+                        background: #f5f5f5;
+                    }
+                    .result-icon {
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 8px;
+                        background: linear-gradient(135deg, #667eea, #764ba2);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 16px;
+                    }
+                    .result-info {
+                        flex: 1;
+                    }
+                    .result-name {
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: #333;
+                    }
+                    .result-desc {
+                        font-size: 12px;
+                        color: #888;
+                        margin-top: 2px;
+                    }
+                    .result-type {
+                        font-size: 11px;
+                        color: #999;
+                        background: #f0f0f0;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                    }
+                    .no-results {
+                        padding: 40px;
+                        text-align: center;
+                        color: #888;
+                    }
+                    .search-footer {
+                        display: flex;
+                        gap: 20px;
+                        padding: 12px 20px;
+                        background: #f8f8f8;
+                        border-top: 1px solid #e5e5e5;
+                        font-size: 12px;
+                        color: #666;
+                    }
+                    .search-footer kbd {
+                        background: white;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        border: 1px solid #ddd;
+                    }
+                    .search-footer span {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    }
+                </style>
+
+                <script>
+                    // Search data
+                    var searchData = <t t-esc="json.dumps(search_items)"/>;
+                    var selectedIndex = -1;
+                    var filteredResults = [];
+
+                    function toggleSearch() {
+                        var overlay = document.getElementById('commandPalette');
+                        var input = document.getElementById('searchInput');
+
+                        if (overlay.style.display === 'none') {
+                            overlay.style.display = 'flex';
+                            setTimeout(function() { input.focus(); }, 10);
+                        } else {
+                            overlay.style.display = 'none';
+                            input.value = '';
+                            clearResults();
+                        }
+                    }
+
+                    function closeSearch(e) {
+                        if (e.target.id === 'commandPalette') {
+                            toggleSearch();
+                        }
+                    }
+
+                    function clearResults() {
+                        document.getElementById('searchResults').innerHTML = '';
+                        selectedIndex = -1;
+                        filteredResults = [];
+                    }
+
+                    function performSearch(query) {
+                        if (!query) {
+                            clearResults();
+                            return;
+                        }
+
+                        var q = query.toLowerCase();
+                        var results = [];
+
+                        for (var i = 0; i < searchData.length; i++) {
+                            var item = searchData[i];
+                            var score = 0;
+
+                            // Exact match
+                            if (item.name.toLowerCase() === q) score += 100;
+                            // Starts with
+                            else if (item.name.toLowerCase().startsWith(q)) score += 50;
+                            // Contains
+                            else if (item.name.toLowerCase().includes(q)) score += 25;
+                            // Keywords match
+                            else if (item.keywords &amp;&amp; item.keywords.includes(q)) score += 10;
+                            // Description match
+                            else if (item.description &amp;&amp; item.description.toLowerCase().includes(q)) score += 5;
+
+                            if (score > 0) {
+                                results.push({item: item, score: score});
+                            }
+                        }
+
+                        // Sort by score
+                        results.sort(function(a, b) { return b.score - a.score; });
+                        filteredResults = results.slice(0, 10);
+                        renderResults(filteredResults);
+                    }
+
+                    function renderResults(results) {
+                        var container = document.getElementById('searchResults');
+                        if (results.length === 0) {
+                            container.innerHTML = '<div class="no-results">Không tìm thấy kết quả</div>';
+                            return;
+                        }
+
+                        var html = '';
+                        for (var i = 0; i < results.length; i++) {
+                            var r = results[i].item;
+                            var icon = r.type === 'module' ? 'fa-th-large' : 'fa-bars';
+                            var selectedClass = i === selectedIndex ? 'selected' : '';
+
+                            html += '<a href="' + r.url + '" class="result-item ' + selectedClass + '" data-index="' + i + '">' +
+                                    '<div class="result-icon"><i class="fa ' + icon + '"></i></div>' +
+                                    '<div class="result-info">' +
+                                    '<div class="result-name">' + r.name + '</div>' +
+                                    '<div class="result-desc">' + (r.description || '') + '</div>' +
+                                    '</div>' +
+                                    '<span class="result-type">' + r.type + '</span>' +
+                                    '</a>';
+                        }
+                        container.innerHTML = html;
+                    }
+
+                    function selectResult(index) {
+                        var items = document.querySelectorAll('.result-item');
+                        if (items[index]) {
+                            items[index].click();
+                        }
+                    }
+
+                    function navigateResults(direction) {
+                        var items = document.querySelectorAll('.result-item');
+                        if (items.length === 0) return;
+
+                        if (direction === 'down') {
+                            selectedIndex = (selectedIndex + 1) % items.length;
+                        } else {
+                            selectedIndex = selectedIndex <= 0 ? items.length - 1 : selectedIndex - 1;
+                        }
+
+                        items.forEach(function(item, idx) {
+                            item.classList.toggle('selected', idx === selectedIndex);
+                        });
+
+                        items[selectedIndex].scrollIntoView({block: 'nearest'});
+                    }
+
+                    // Event listeners
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Clock
+                        function updateClock() {
+                            var now = new Date();
+                            var h = now.getHours().toString().padStart(2,'0');
+                            var m = now.getMinutes().toString().padStart(2,'0');
+                            var el = document.getElementById('clock');
+                            if (el) el.textContent = h + ':' + m;
+                        }
+                        updateClock();
+                        setInterval(updateClock, 1000);
+
+                        // Search input
+                        var input = document.getElementById('searchInput');
+                        if (input) {
+                            input.addEventListener('input', function() {
+                                performSearch(this.value);
+                            });
+
+                            input.addEventListener('keydown', function(e) {
+                                if (e.key === 'ArrowDown') {
+                                    e.preventDefault();
+                                    navigateResults('down');
+                                } else if (e.key === 'ArrowUp') {
+                                    e.preventDefault();
+                                    navigateResults('up');
+                                } else if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (selectedIndex >= 0) {
+                                        selectResult(selectedIndex);
+                                    } else if (filteredResults.length > 0) {
+                                        window.location.href = filteredResults[0].item.url;
+                                    }
+                                }
+                            });
+                        }
+
+                        // Keyboard shortcut Ctrl+K
+                        document.addEventListener('keydown', function(e) {
+                            if ((e.ctrlKey || e.metaKey) &amp;&amp; e.key === 'k') {
+                                e.preventDefault();
+                                toggleSearch();
+                            } else if (e.key === 'Escape') {
+                                var overlay = document.getElementById('commandPalette');
+                                if (overlay.style.display !== 'none') {
+                                    toggleSearch();
+                                }
+                            }
+                        });
+                    });
+                </script>
+            </t>
+        </template>
+    </data>
+</odoo>
