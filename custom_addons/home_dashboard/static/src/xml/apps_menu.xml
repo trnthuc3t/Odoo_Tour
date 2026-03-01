@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="home_dashboard.AppsMenu">
+        <!-- Toggle button -->
+        <button class="o_navbar_apps_menu_btn" t-on-click="toggle">
+            <i class="oi oi-apps"/>
+        </button>
+
+        <!-- Full-screen overlay -->
+        <t t-if="state.isOpen">
+            <div class="o_home_apps_overlay" t-on-click.self="close">
+                <div class="o_home_apps_container">
+                    <!-- Close button -->
+                    <button class="o_home_apps_close" t-on-click="close">
+                        <i class="fa fa-times"/>
+                    </button>
+
+                    <!-- Search bar -->
+                    <div class="o_home_apps_search">
+                        <i class="fa fa-search"/>
+                        <input type="text"
+                               t-ref="searchInput"
+                               placeholder="Tìm kiếm module..."
+                               t-on-input="onSearchInput"
+                               t-att-value="state.searchTerm"/>
+                    </div>
+
+                    <!-- Apps grid -->
+                    <div class="o_home_apps_grid">
+                        <t t-foreach="filteredApps" t-as="app" t-key="app.id">
+                            <a class="o_home_app_item"
+                               t-att-href="props.getMenuItemHref(app)"
+                               t-on-click="() => this.onAppClick(app)">
+                                <div class="o_home_app_icon">
+                                    <img t-att-src="getAppIcon(app)"
+                                         t-att-alt="app.name"
+                                         onerror="this.onerror=null;this.src='/web/static/img/odoo-icon.svg'"/>
+                                </div>
+                                <span class="o_home_app_name" t-esc="app.name"/>
+                            </a>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </t>
+
+    <!-- Override default NavBar AppsMenu template -->
+    <t t-name="web.NavBar.AppsMenu" t-inherit="web.NavBar.AppsMenu" t-inherit-mode="extension">
+        <xpath expr="//Dropdown" position="replace">
+            <HomeAppsMenu
+                apps="apps"
+                getMenuItemHref="getMenuItemHref"
+                onNavBarDropdownItemSelection.bind="onNavBarDropdownItemSelection"/>
+        </xpath>
+    </t>
+</templates>

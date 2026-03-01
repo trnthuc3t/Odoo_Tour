@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Menu item chính -->
+        <menuitem id="menu_department_root"
+                  name="Departments"
+                  sequence="20"/>
+
+        <!-- Menu con - Danh sách phòng ban -->
+        <menuitem id="menu_department_list"
+                  name="Danh sách Departments"
+                  action="action_custom_department"
+                  parent="menu_department_root"
+                  sequence="1"/>
+    </data>
+</odoo>

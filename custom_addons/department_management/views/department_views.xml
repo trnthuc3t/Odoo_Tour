@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- List View -->
+        <record id="view_custom_department_list" model="ir.ui.view">
+            <field name="name">custom.department.list</field>
+            <field name="model">custom.department</field>
+            <field name="arch" type="xml">
+                <tree string="Danh sách Phòng ban">
+                    <field name="name"/>
+                    <field name="manager_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_custom_department_form" model="ir.ui.view">
+            <field name="name">custom.department.form</field>
+            <field name="model">custom.department</field>
+            <field name="arch" type="xml">
+                <form string="Phòng ban">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1><field name="name" placeholder="Tên phòng ban..."/></h1>
+                        </div>
+                        <group>
+                            <field name="manager_id" placeholder="Chọn trưởng phòng..."/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Window Action -->
+        <record id="action_custom_department" model="ir.actions.act_window">
+            <field name="name">Departments</field>
+            <field name="res_model">custom.department</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>
